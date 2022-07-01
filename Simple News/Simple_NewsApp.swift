@@ -9,6 +9,9 @@ import SwiftUI
 
 @main
 struct Simple_NewsApp: App {
+    init() {
+        UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+    }
     var body: some Scene {
         WindowGroup {
             NavigationView {

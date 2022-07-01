@@ -15,9 +15,13 @@ struct ContentView: View {
         case failed
     }
     
-    @State private var articles = [Article]()
+    let apiKey: String = "YOUR API KEY HERE"
+    
+
     @State private var loadState = LoadState.loading
     @State private var searchText = ""
+//    @State private var results = [Result]()
+    @State private var articleData: ArticleData?
     
     var body: some View {
         Group {
@@ -28,9 +32,35 @@ struct ContentView: View {
                     ProgressView()
                 }
             case .success:
-                List(filteredArticles, rowContent: ArticleRow.init)
-                    .refreshable(action: downloadArticles)
-                    .searchable(text: $searchText)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 30) {
+                            ForEach(articleData!.response.results) { result in
+                                VStack {
+                                    if (result.fields.thumbnail != nil) {
+                                        AsyncImage(url: result.fields.thumbnail!) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                ProgressView()
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .scaledToFill()
+                                            default:
+                                                Image(systemName: "newspaper")
+                                            }
+                                        }
+                                    }
+                                    Text(result.webTitle)
+                                    Text(result.fields.trailText)
+                                        .font(.caption.weight(.bold))
+                                        .padding(.horizontal)
+                                    Divider()
+                                }
+                        }
+                            .refreshable(action: downloadArticles)
+                    }
+                }
+                   
             case .failed:
                 VStack {
                     Text("Failed to download articles")
@@ -52,24 +82,19 @@ struct ContentView: View {
         
     }
     
-    var filteredArticles: [Article] {
-        if searchText.isEmpty {
-            return articles
-        } else {
-            return articles.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
-        }
-    }
-    
     @Sendable func downloadArticles() async {
         do {
-            let url = URL(string: "https://hws.dev/news")!
+            let url = URL(string: "https://content.guardianapis.com/search?show-fields=all&page-size=30&api-key=\(apiKey)")!
+            
+            
             let (data, _) = try await URLSession.shared.data(from: url)
             
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             
-            articles = try decoder.decode([Article].self, from: data).sorted()
+            articleData = try decoder.decode(ArticleData.self, from: data)
             loadState = .success
+      
         } catch {
             loadState = .failed
         }
