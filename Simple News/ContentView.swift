@@ -15,7 +15,7 @@ struct ContentView: View {
         case failed
     }
     
-    let apiKey: String = "YOUR GUARDIAN API HERE"
+    let apiKey: String = "YOUR GUARDIAN API KEY HERE"
     
 
     @State private var loadState = LoadState.loading
