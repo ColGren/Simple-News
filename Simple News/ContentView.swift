@@ -15,7 +15,7 @@ struct ContentView: View {
         case failed
     }
     
-    let apiKey: String = "YOUR GUARDIAN API HERE"
+    let apiKey: String = "YOUR GUARDIAN DEV API KEY HERE"
     
 
     @State private var loadState = LoadState.loading
@@ -33,8 +33,9 @@ struct ContentView: View {
                 }
                 
             case .success:
-                List(articles, rowContent: ArticleSummaryView.init)
-                            .refreshable(action: downloadArticles)
+                List(filtered, rowContent: ArticleSummaryView.init)
+                        .refreshable(action: downloadArticles)
+                        .searchable(text: $searchText)
                    
             case .failed:
                 VStack {
@@ -57,12 +58,11 @@ struct ContentView: View {
         
     }
     
-//    var filtered: [ArticleData.Response.Article] {
-//        if searchText.isEmpty { return articleData!.response.results } else {
-////            return articleData!.response.results.filter{ $0.webTitle.localizedCaseInsensitiveContains(searchText) }
-//            return articleData!.response.results
-//        }
-//    }
+    var filtered: [ArticleData.Response.Article] {
+        if searchText.isEmpty { return articles } else {
+            return articles.filter{ $0.webTitle.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
 
     @Sendable func downloadArticles() async {
         do {
