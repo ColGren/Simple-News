@@ -4,7 +4,7 @@ import Foundation
 
 struct ArticleData: Codable {
   struct Response: Codable {
-    struct Result: Codable, Identifiable {
+    struct Article: Codable, Identifiable {
       struct Field: Codable {
         let headline: String
         let standfirst: String?
@@ -108,7 +108,7 @@ struct ArticleData: Codable {
     let currentPage: Int
     let pages: Int
     let orderBy: String
-    let results: [Result]
+    let results: [Article]
   }
 
   let response: Response
